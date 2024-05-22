@@ -7,23 +7,25 @@
 
 using namespace std;
 
-// way to compare to Red and Black instead of 0 ans 1
+// Enum to define color for Red-Black Tree nodes
 enum Color { RED, BLACK };
 
-// Struct for node with values initioalized at the beigninge
+// Struct for node with values initialized at the beginning
 struct node {
-    int data;
-    node* left;
-    node* right;
-    node* parent;
-    Color color;
-    node(int data) : data(data), left(nullptr), right(nullptr), parent(nullptr), color(BLACK) {}
+    int data;           // Data stored in the node
+    node* left;         // Pointer to the left child
+    node* right;        // Pointer to the right child
+    node* parent;       // Pointer to the parent node
+    Color color;        // Color of the node (RED or BLACK)
+    node(int data) : data(data), left(nullptr), right(nullptr), parent(nullptr), color(BLACK) {} // Constructor to initialize node
 };
 
+// Class representing the Red-Black Tree
 class RedBlackTree {
 private:
-    node* root;
+    node* root;         // Pointer to the root of the tree
 
+    // Function to perform a left rotation around the given node
     void leftRotate(node* current) {
         node* y = current->right;
         current->right = y->left;
@@ -40,6 +42,7 @@ private:
         current->parent = y;
     }
 
+    // Function to perform a right rotation around the given node
     void rightRotate(node* y) {
         node* current = y->left;
         y->left = current->right;
@@ -56,7 +59,8 @@ private:
         y->parent = current;
     }
 
-    void ficurrentInsertion(node* z) {
+    // Function to fix the tree after an insertion operation
+    void fixInsertion(node* z) {
         while (z != root && z->parent->color == RED) {
             if (z->parent == z->parent->parent->left) {
                 node* y = z->parent->parent->right;
@@ -95,19 +99,19 @@ private:
         root->color = BLACK;
     }
 
+    // Function to replace one subtree as a child of its parent with another subtree
     void transplant(node* current, node* comp) {
         if (current->parent == nullptr) {
             root = comp;
-        }
-        else if (current == current->parent->left) {
+        } else if (current == current->parent->left) {
             current->parent->left = comp;
-        }
-        else {
+        } else {
             current->parent->right = comp;
         }
         comp->parent = current->parent;
     }
 
+    // Function to find the node with the minimum value in a subtree
     node* minValueNode(node* minnode) {
         node* current = minnode;
         while (current->left != nullptr)
@@ -115,7 +119,8 @@ private:
         return current;
     }
 
-    void ficurrentDeletion(node* current) {
+    // Function to fix the tree after a deletion operation
+    void fixDeletion(node* current) {
         while (current != root && current->color == BLACK) {
             if (current == current->parent->left) {
                 node* pRight = current->parent->right;
@@ -170,6 +175,7 @@ private:
         current->color = BLACK;
     }
 
+    // Helper function for inorder traversal
     void inorderHelper(node* root, int level) {
         if (root != nullptr) {
             inorderHelper(root->right, level + 1);
@@ -185,10 +191,12 @@ private:
     }
 
 public:
+    // Constructor to initialize the Red-Black Tree
     RedBlackTree() : root(nullptr) {}
 
+    // Function to insert a new node into the tree
     void insert(int data) {
-        node* z = nepRight node(data);
+        node* z = new node(data);
         node* y = nullptr;
         node* current = root;
 
@@ -209,12 +217,13 @@ public:
         z->left = nullptr;
         z->right = nullptr;
         z->color = RED;
-        ficurrentInsertion(z);
+        fixInsertion(z); // Fix any violations caused by the insertion
     }
 
+    // Function to remove a node with the given data from the tree
     void remove(int data) {
         node* z = root;
-        node* current, *y;
+        node* current, * y;
         while (z != nullptr) {
             if (z->data == data)
                 break;
@@ -252,10 +261,11 @@ public:
             y->color = z->color;
         }
         if (y_original_color == BLACK)
-            ficurrentDeletion(current);
+            fixDeletion(current); // Fix any violations caused by the deletion
         delete z;
     }
 
+    // Function to search for a node with the given data
     void search(int data) {
         node* node = root;
         while (node != nullptr) {
@@ -270,10 +280,12 @@ public:
         cout << "Not Found: " << data << endl;
     }
 
+    // Function to perform inorder traversal of the tree
     void inorder() {
         inorderHelper(root, 0);
     }
 
+    // Function to read data from a file and insert into the tree
     void readFromFile(const string& filename) {
         ifstream inputFile(filename);
         if (inputFile.is_open()) {
@@ -286,9 +298,9 @@ public:
             cout << "Unable to open file: " << filename << endl;
         }
     }
-
 };
 
+// Main function to interact with the Red-Black Tree
 int main() {
     RedBlackTree rbt;
     string input;
