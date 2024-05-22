@@ -1,11 +1,16 @@
+// Used Algorithm Tutor (deletion) and Parents (insertion) 
+// Nikaansh S.
+
 #include <iostream>
 #include <string>
 #include <fstream>
 
 using namespace std;
 
+// way to compare to Red and Black instead of 0 ans 1
 enum Color { RED, BLACK };
 
+// Struct for node with values initioalized at the beigninge
 struct node {
     int data;
     node* left;
@@ -90,19 +95,21 @@ private:
         root->color = BLACK;
     }
 
-    void transplant(node* u, node* v) {
-        if (u->parent == nullptr)
-            root = v;
-        else if (u == u->parent->left)
-            u->parent->left = v;
-        else
-            u->parent->right = v;
-        if (v != nullptr)
-            v->parent = u->parent;
+    void transplant(node* current, node* comp) {
+        if (current->parent == nullptr) {
+            root = comp;
+        }
+        else if (current == current->parent->left) {
+            current->parent->left = comp;
+        }
+        else {
+            current->parent->right = comp;
+        }
+        comp->parent = current->parent;
     }
 
-    node* minValueNode(node* node) {
-        node* current = node;
+    node* minValueNode(node* minnode) {
+        node* current = minnode;
         while (current->left != nullptr)
             current = current->left;
         return current;
@@ -111,50 +118,50 @@ private:
     void ficurrentDeletion(node* current) {
         while (current != root && current->color == BLACK) {
             if (current == current->parent->left) {
-                node* w = current->parent->right;
-                if (w->color == RED) {
-                    w->color = BLACK;
+                node* pRight = current->parent->right;
+                if (pRight->color == RED) {
+                    pRight->color = BLACK;
                     current->parent->color = RED;
                     leftRotate(current->parent);
-                    w = current->parent->right;
+                    pRight = current->parent->right;
                 }
-                if (w->left->color == BLACK && w->right->color == BLACK) {
-                    w->color = RED;
+                if (pRight->left->color == BLACK && pRight->right->color == BLACK) {
+                    pRight->color = RED;
                     current = current->parent;
                 } else {
-                    if (w->right->color == BLACK) {
-                        w->left->color = BLACK;
-                        w->color = RED;
-                        rightRotate(w);
-                        w = current->parent->right;
+                    if (pRight->right->color == BLACK) {
+                        pRight->left->color = BLACK;
+                        pRight->color = RED;
+                        rightRotate(pRight);
+                        pRight = current->parent->right;
                     }
-                    w->color = current->parent->color;
+                    pRight->color = current->parent->color;
                     current->parent->color = BLACK;
-                    w->right->color = BLACK;
+                    pRight->right->color = BLACK;
                     leftRotate(current->parent);
                     current = root;
                 }
             } else {
-                node* w = current->parent->left;
-                if (w->color == RED) {
-                    w->color = BLACK;
+                node* pRight = current->parent->left;
+                if (pRight->color == RED) {
+                    pRight->color = BLACK;
                     current->parent->color = RED;
                     rightRotate(current->parent);
-                    w = current->parent->left;
+                    pRight = current->parent->left;
                 }
-                if (w->right->color == BLACK && w->left->color == BLACK) {
-                    w->color = RED;
+                if (pRight->right->color == BLACK && pRight->left->color == BLACK) {
+                    pRight->color = RED;
                     current = current->parent;
                 } else {
-                    if (w->left->color == BLACK) {
-                        w->right->color = BLACK;
-                        w->color = RED;
-                        leftRotate(w);
-                        w = current->parent->left;
+                    if (pRight->left->color == BLACK) {
+                        pRight->right->color = BLACK;
+                        pRight->color = RED;
+                        leftRotate(pRight);
+                        pRight = current->parent->left;
                     }
-                    w->color = current->parent->color;
+                    pRight->color = current->parent->color;
                     current->parent->color = BLACK;
-                    w->left->color = BLACK;
+                    pRight->left->color = BLACK;
                     rightRotate(current->parent);
                     current = root;
                 }
@@ -181,7 +188,7 @@ public:
     RedBlackTree() : root(nullptr) {}
 
     void insert(int data) {
-        node* z = new node(data);
+        node* z = nepRight node(data);
         node* y = nullptr;
         node* current = root;
 
