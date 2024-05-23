@@ -122,73 +122,90 @@ private:
         return current;
     }
 
-    void fixDeletion(Node* helper) {
-        Node* sibling;
-        while (helper != root && (helper == NULL || helper->color == BLACK)) {
-            if (helper == helper->parent->left) {
+// Function to fix the tree after a deletion operation
+void fixDeletion(Node* helper) {
+    Node* sibling;
+    while (helper != root && (helper == NULL || helper->color == BLACK)) {
+        if (helper == helper->parent->left) {
+            cout << "Helper is a left child..." << endl;
+            sibling = helper->parent->right;
+            if (sibling->color == RED) {
+                cout << "Sibling is RED..." << endl;
+                sibling->color = BLACK;
+                helper->parent->color = RED;
+                leftRotate(helper->parent);
                 sibling = helper->parent->right;
-                if (sibling->color == RED) {
-                    sibling->color = BLACK;
-                    helper->parent->color = RED;
-                    leftRotate(helper->parent);
-                    sibling = helper->parent->right;
-                }
-                if ((sibling->left == NULL || sibling->left->color == BLACK) &&
-                    (sibling->right == NULL || sibling->right->color == BLACK)) {
-                    sibling->color = RED;
-                    helper = helper->parent;
-                } else {
-                    if (sibling->right == NULL || sibling->right->color == BLACK) {
-                        if (sibling->left != NULL) {
-                            sibling->left->color = BLACK;
-                        }
-                        sibling->color = RED;
-                        rightRotate(sibling);
-                        sibling = helper->parent->right;
-                    }
-                    sibling->color = helper->parent->color;
-                    helper->parent->color = BLACK;
-                    if (sibling->right != NULL) {
-                        sibling->right->color = BLACK;
-                    }
-                    leftRotate(helper->parent);
-                    helper = root;
-                }
+                cout << "Performed left rotation at parent..." << endl;
+            }
+            if ((sibling->left == NULL || sibling->left->color == BLACK) &&
+                (sibling->right == NULL || sibling->right->color == BLACK)) {
+                cout << "Both children of sibling are BLACK..." << endl;
+                sibling->color = RED;
+                helper = helper->parent;
             } else {
-                sibling = helper->parent->left;
-                if (sibling->color == RED) {
-                    sibling->color = BLACK;
-                    helper->parent->color = RED;
-                    rightRotate(helper->parent);
-                    sibling = helper->parent->left;
-                }
-                if ((sibling->right == NULL || sibling->right->color == BLACK) &&
-                    (sibling->left == NULL || sibling->left->color == BLACK)) {
-                    sibling->color = RED;
-                    helper = helper->parent;
-                } else {
-                    if (sibling->left == NULL || sibling->left->color == BLACK) {
-                        if (sibling->right != NULL) {
-                            sibling->right->color = BLACK;
-                        }
-                        sibling->color = RED;
-                        leftRotate(sibling);
-                        sibling = helper->parent->left;
-                    }
-                    sibling->color = helper->parent->color;
-                    helper->parent->color = BLACK;
+                if (sibling->right == NULL || sibling->right->color == BLACK) {
+                    cout << "Right child of sibling is BLACK..." << endl;
                     if (sibling->left != NULL) {
                         sibling->left->color = BLACK;
                     }
-                    rightRotate(helper->parent);
-                    helper = root;
+                    sibling->color = RED;
+                    rightRotate(sibling);
+                    sibling = helper->parent->right;
+                    cout << "Performed right rotation at sibling..." << endl;
                 }
+                sibling->color = helper->parent->color;
+                helper->parent->color = BLACK;
+                if (sibling->right != NULL) {
+                    sibling->right->color = BLACK;
+                }
+                leftRotate(helper->parent);
+                helper = root;
+                cout << "Performed left rotation at parent..." << endl;
+            }
+        } else {
+            cout << "Helper is a right child..." << endl;
+            sibling = helper->parent->left;
+            if (sibling->color == RED) {
+                cout << "Sibling is RED..." << endl;
+                sibling->color = BLACK;
+                helper->parent->color = RED;
+                rightRotate(helper->parent);
+                sibling = helper->parent->left;
+                cout << "Performed right rotation at parent..." << endl;
+            }
+            if ((sibling->right == NULL || sibling->right->color == BLACK) &&
+                (sibling->left == NULL || sibling->left->color == BLACK)) {
+                cout << "Both children of sibling are BLACK..." << endl;
+                sibling->color = RED;
+                helper = helper->parent;
+            } else {
+                if (sibling->left == NULL || sibling->left->color == BLACK) {
+                    cout << "Left child of sibling is BLACK..." << endl;
+                    if (sibling->right != NULL) {
+                        sibling->right->color = BLACK;
+                    }
+                    sibling->color = RED;
+                    leftRotate(sibling);
+                    sibling = helper->parent->left;
+                    cout << "Performed left rotation at sibling..." << endl;
+                }
+                sibling->color = helper->parent->color;
+                helper->parent->color = BLACK;
+                if (sibling->left != NULL) {
+                    sibling->left->color = BLACK;
+                }
+                rightRotate(helper->parent);
+                helper = root;
+                cout << "Performed right rotation at parent..." << endl;
             }
         }
-        if (helper != NULL) {
-            helper->color = BLACK;
-        }
     }
+    if (helper != NULL) {
+        helper->color = BLACK;
+        cout << "Helper is colored BLACK..." << endl;
+    }
+}
+
 
     // Helper function to perform inorder traversal of the tree
     void inorderHelper(Node* root, int level) {
@@ -325,13 +342,16 @@ void remove(int data) {
             helper->right = nodeToDelete->right; // Update the right child of the helper node
             helper->right->parent = helper; // Update the parent of the right child
         }
+        cout << "Bfr Transplant" << endl;
         transplant(nodeToDelete, helper); // Replace nodeToDelete with the helper node
         helper->left = nodeToDelete->left; // Update the left child of the helper node
         helper->left->parent = helper; // Update the parent of the left child
         helper->color = nodeToDelete->color; // Update the color of the helper node
     }
     delete nodeToDelete; // Delete the nodeToDelete
+    cout << "After node is deleted" << endl;
     if (originalColor == BLACK) {
+        cout << "Fixing delete" << endl;
         fixDeletion(helperChild); // Fix any violations of Red-Black Tree properties
     }
 }
