@@ -196,7 +196,19 @@ private:
             inorderHelper(root->right, level + 1); // Traverse right subtree
             for (int i = 0; i < level; i++)        // Indentation based on tree level
                 cout << "   ";
-            cout << root->data;
+            cout << "Node: " << root->data;
+            if (root->parent != NULL)
+                cout << " (Parent: " << root->parent->data << ")";
+            else
+                cout << " (Parent: NULL)";
+            if (root->left != NULL)
+                cout << " (Left: " << root->left->data << ")";
+            else
+                cout << " (Left: NULL)";
+            if (root->right != NULL)
+                cout << " (Right: " << root->right->data << ")";
+            else
+                cout << " (Right: NULL)";
             if (root->color == RED)
                 cout << " (Red)" << endl;          // Indicate red nodes
             else
@@ -204,6 +216,7 @@ private:
             inorderHelper(root->left, level + 1);  // Traverse left subtree
         }
     }
+
 
     // Helper function to print the tree structure for debugging
     void debugHelper(Node* root) {
@@ -262,20 +275,20 @@ public:
 
     // Function to remove a node with the given data from the tree
     void remove(int data) {
-        Node* node = root;
+        Node* nodert = root;
         Node* nodeToDelete = NULL;
         Node* helper;
         Node* helperChild;
         
         // Find the node to delete
-        while (node != NULL) {
-            if (node->data == data) {
-                nodeToDelete = node;
+        while (nodert != NULL) {
+            if (nodert->data == data) {
+                nodeToDelete = nodert;
             }
-            if (node->data <= data) {
-                node = node->right;
+            if (nodert->data <= data) {
+                nodert = nodert->right;
             } else {
-                node = node->left;
+                nodert = nodert->left;
             }
         }
         
@@ -298,9 +311,7 @@ public:
             originalColor = helper->color;
             helperChild = helper->right;
             if (helper->parent == nodeToDelete) {
-                if (helperChild != NULL) {
                     helperChild->parent = helper;
-                }
             } else {
                 transplant(helper, helper->right);
                 helper->right = nodeToDelete->right;
@@ -311,7 +322,7 @@ public:
             helper->left->parent = helper;
             helper->color = nodeToDelete->color;
         }
-        
+        delete nodeToDelete;
         if (originalColor == BLACK) {
             fixDeletion(helperChild);
         }
