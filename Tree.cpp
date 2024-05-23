@@ -122,62 +122,72 @@ private:
         return current;
     }
 
-// Function to fix the tree after a deletion operation
-    void fixDeletion(Node* node) {
-        while (node != root && (node == NULL || node->color == BLACK)) {
-            if (node == node->parent->left) {
-                Node* sibling = node->parent->right;
+    void fixDeletion(Node* helper) {
+        Node* sibling;
+        while (helper != root && (helper == NULL || helper->color == BLACK)) {
+            if (helper == helper->parent->left) {
+                sibling = helper->parent->right;
                 if (sibling->color == RED) {
-                    sibling->color = BLACK;  // Case 1: Sibling is RED
-                    node->parent->color = RED;  // Recolor sibling to BLACK and parent to RED
-                    leftRotate(node->parent);  // Left rotate at parent
-                    sibling = node->parent->right;  // Update sibling
+                    sibling->color = BLACK;
+                    helper->parent->color = RED;
+                    leftRotate(helper->parent);
+                    sibling = helper->parent->right;
                 }
                 if ((sibling->left == NULL || sibling->left->color == BLACK) &&
                     (sibling->right == NULL || sibling->right->color == BLACK)) {
-                    sibling->color = RED;  // Case 2: Both children of sibling are BLACK
-                    node = node->parent;  // Move node up to parent
+                    sibling->color = RED;
+                    helper = helper->parent;
                 } else {
                     if (sibling->right == NULL || sibling->right->color == BLACK) {
-                        if (sibling->left != NULL) sibling->left->color = BLACK;  // Case 3: Sibling's left child is RED
-                        sibling->color = RED;  // Recolor sibling to RED
-                        rightRotate(sibling);  // Right rotate at sibling
-                        sibling = node->parent->right;  // Update sibling
+                        if (sibling->left != NULL) {
+                            sibling->left->color = BLACK;
+                        }
+                        sibling->color = RED;
+                        rightRotate(sibling);
+                        sibling = helper->parent->right;
                     }
-                    sibling->color = node->parent->color;  // Case 4: Sibling's right child is RED
-                    node->parent->color = BLACK;  // Recolor parent to BLACK
-                    if (sibling->right != NULL) sibling->right->color = BLACK;  // Recolor sibling's right child to BLACK
-                    leftRotate(node->parent);  // Left rotate at parent
-                    node = root;  // Set node to root to terminate loop
+                    sibling->color = helper->parent->color;
+                    helper->parent->color = BLACK;
+                    if (sibling->right != NULL) {
+                        sibling->right->color = BLACK;
+                    }
+                    leftRotate(helper->parent);
+                    helper = root;
                 }
             } else {
-                Node* sibling = node->parent->left;
+                sibling = helper->parent->left;
                 if (sibling->color == RED) {
-                    sibling->color = BLACK;  // Case 1: Sibling is RED
-                    node->parent->color = RED;  // Recolor sibling to BLACK and parent to RED
-                    rightRotate(node->parent);  // Right rotate at parent
-                    sibling = node->parent->left;  // Update sibling
+                    sibling->color = BLACK;
+                    helper->parent->color = RED;
+                    rightRotate(helper->parent);
+                    sibling = helper->parent->left;
                 }
-                if ((sibling->left == NULL || sibling->left->color == BLACK) &&
-                    (sibling->right == NULL || sibling->right->color == BLACK)) {
-                    sibling->color = RED;  // Case 2: Both children of sibling are BLACK
-                    node = node->parent;  // Move node up to parent
+                if ((sibling->right == NULL || sibling->right->color == BLACK) &&
+                    (sibling->left == NULL || sibling->left->color == BLACK)) {
+                    sibling->color = RED;
+                    helper = helper->parent;
                 } else {
                     if (sibling->left == NULL || sibling->left->color == BLACK) {
-                        if (sibling->right != NULL) sibling->right->color = BLACK;  // Case 3: Sibling's right child is RED
-                        sibling->color = RED;  // Recolor sibling to RED
-                        leftRotate(sibling);  // Left rotate at sibling
-                        sibling = node->parent->left;  // Update sibling
+                        if (sibling->right != NULL) {
+                            sibling->right->color = BLACK;
+                        }
+                        sibling->color = RED;
+                        leftRotate(sibling);
+                        sibling = helper->parent->left;
                     }
-                    sibling->color = node->parent->color;  // Case 4: Sibling's left child is RED
-                    node->parent->color = BLACK;  // Recolor parent to BLACK
-                    if (sibling->left != NULL) sibling->left->color = BLACK;  // Recolor sibling's left child to BLACK
-                    rightRotate(node->parent);  // Right rotate at parent
-                    node = root;  // Set node to root to terminate loop
+                    sibling->color = helper->parent->color;
+                    helper->parent->color = BLACK;
+                    if (sibling->left != NULL) {
+                        sibling->left->color = BLACK;
+                    }
+                    rightRotate(helper->parent);
+                    helper = root;
                 }
             }
         }
-        if (node != NULL) node->color = BLACK;  // Ensure node is BLACK
+        if (helper != NULL) {
+            helper->color = BLACK;
+        }
     }
 
     // Helper function to perform inorder traversal of the tree
@@ -195,97 +205,116 @@ private:
         }
     }
 
+    // Helper function to print the tree structure for debugging
+    void debugHelper(Node* root) {
+        if (root != NULL) {
+            cout << "Node: " << root->data << " Color: " << (root->color == RED ? "Red" : "Black");
+            if (root->parent != NULL)
+                cout << " Parent: " << root->parent->data;
+            else
+                cout << " Parent: NULL";
+            if (root->left != NULL)
+                cout << " Left: " << root->left->data;
+            else
+                cout << " Left: NULL";
+            if (root->right != NULL)
+                cout << " Right: " << root->right->data;
+            else
+                cout << " Right: NULL";
+            cout << endl;
+            debugHelper(root->left);
+            debugHelper(root->right);
+        }
+    }
+
 public:
-    // Constructor to initialize an empty Red-Black Tree
+    // Constructor to initialize the tree with a NULL root
     RedBlackTree() : root(NULL) {}
 
-    // Function to insert a new node into the tree
+    // Function to insert a new value into the tree
     void insert(int data) {
-        Node* newNode = new Node(data);           // Create a new node
-        Node* parent = NULL;
-        Node* current = root;
-
-        while (current != NULL) {              // Find the correct position to insert
-            parent = current;
-            if (newNode->data < current->data)
-                current = current->left;
-            else
-                current = current->right;
+        Node* newNode = new Node(data);  // Create a new node with the given data
+        newNode->color = RED;            // New nodes are always red
+        if (root == NULL) {
+            root = newNode;              // Insert as root if tree is empty
+            root->color = BLACK;         // Root is always black
+            return;
         }
-        newNode->parent = parent;                 // Set the parent of the new node
-        if (parent == NULL)
-            root = newNode;                       // New node is the root if tree was empty
-        else if (newNode->data < parent->data)
-            parent->left = newNode;               // Insert as left child
+
+        Node* current = root;            // Start at the root
+        Node* parent = NULL;
+        while (current != NULL) {
+            parent = current;
+            if (data < current->data)
+                current = current->left; // Move to the left child
+            else
+                current = current->right; // Move to the right child
+        }
+
+        newNode->parent = parent;        // Set parent of the new node
+        if (data < parent->data)
+            parent->left = newNode;      // Set as left child
         else
-            parent->right = newNode;              // Insert as right child
-        newNode->color = RED;                     // New node must be RED
-        fixInsertion(newNode);                    // Fix any violations caused by insertion
+            parent->right = newNode;     // Set as right child
+
+        fixInsertion(newNode);           // Fix any violations of the Red-Black Tree properties
     }
 
     // Function to remove a node with the given data from the tree
     void remove(int data) {
-        Node* targetNode = root;  // Initialize the node to be removed
-        Node* replacementNode;  // Node that will replace the removed node
-        Node* nodeToFix;  // Node that may need fixing to maintain tree properties
-        Color originalColor;  // Store the original color of the replacement node
-
-        // Traverse the tree to find the node with the given data
-        while (targetNode != NULL && targetNode->data != data) {
-            if (data < targetNode->data)
-                targetNode = targetNode->left;  // Traverse left subtree
-            else
-                targetNode = targetNode->right;  // Traverse right subtree
+        Node* node = root;
+        Node* nodeToDelete = NULL;
+        Node* helper;
+        Node* helperChild;
+        
+        // Find the node to delete
+        while (node != NULL) {
+            if (node->data == data) {
+                nodeToDelete = node;
+            }
+            if (node->data <= data) {
+                node = node->right;
+            } else {
+                node = node->left;
+            }
         }
-
-        // If the node to be deleted is not found, print an error message and return
-        if (targetNode == NULL) {
-            cout << "Couldn't find key in the tree\n";
+        
+        if (nodeToDelete == NULL) {
+            cout << "No such node exists." << endl;
             return;
         }
-
-        replacementNode = targetNode;  // Start with the target node as the replacement
-        originalColor = replacementNode->color;  // Save the original color of the replacement node
-
-        // If the left child is null, replace the target node with its right child
-        if (targetNode->left == NULL) {
-            nodeToFix = targetNode->right;
-            transplant(targetNode, targetNode->right);
-        }
-        // If the right child is null, replace the target node with its left child
-        else if (targetNode->right == NULL) {
-            nodeToFix = targetNode->left;
-            transplant(targetNode, targetNode->left);
-        }
-        // If the target node has two children
-        else {
-            // Find the minimum value node in the right subtree
-            replacementNode = minValueNode(targetNode->right);
-            originalColor = replacementNode->color;  // Save the color of the replacement node
-            nodeToFix = replacementNode->right;  // Right child of the replacement node
-
-            // If the replacement node's parent is the target node
-            if (replacementNode->parent == targetNode) {
-                if (nodeToFix != NULL)
-                    nodeToFix->parent = replacementNode;
+        
+        // Replace the node to delete with its successor if necessary
+        helper = nodeToDelete;
+        Color originalColor = helper->color;
+        if (nodeToDelete->left == NULL) {
+            helperChild = nodeToDelete->right;
+            transplant(nodeToDelete, nodeToDelete->right);
+        } else if (nodeToDelete->right == NULL) {
+            helperChild = nodeToDelete->left;
+            transplant(nodeToDelete, nodeToDelete->left);
+        } else {
+            helper = minValueNode(nodeToDelete->right);
+            originalColor = helper->color;
+            helperChild = helper->right;
+            if (helper->parent == nodeToDelete) {
+                if (helperChild != NULL) {
+                    helperChild->parent = helper;
+                }
             } else {
-                // Replace the replacement node with its right child
-                transplant(replacementNode, replacementNode->right);
-                replacementNode->right = targetNode->right;  // Set the target's right child to replacement
-                replacementNode->right->parent = replacementNode;
+                transplant(helper, helper->right);
+                helper->right = nodeToDelete->right;
+                helper->right->parent = helper;
             }
-            // Replace the target node with the replacement node
-            transplant(targetNode, replacementNode);
-            replacementNode->left = targetNode->left;  // Set the target's left child to replacement
-            replacementNode->left->parent = replacementNode;
-            replacementNode->color = targetNode->color;  // Set the replacement node's color to the target's color
+            transplant(nodeToDelete, helper);
+            helper->left = nodeToDelete->left;
+            helper->left->parent = helper;
+            helper->color = nodeToDelete->color;
         }
-
-        // Fix the tree if the original color of the replacement node was BLACK
-        if (originalColor == BLACK)
-            fixDeletion(nodeToFix);
-
-        delete targetNode;  // Delete the target node
+        
+        if (originalColor == BLACK) {
+            fixDeletion(helperChild);
+        }
     }
 
     // Function to search for a node with the given data in the tree
