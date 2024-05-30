@@ -273,60 +273,69 @@ public:
         fixInsertion(newNode);           // Fix any violations of the Red-Black Tree properties
     }
 
-// Function to remove a node with the given data from the tree
-void remove(int data) {
-    Node* nodert = root;        // Temporary pointer for traversing the tree
-    Node* nodeToDelete = NULL;  // Pointer to the node to be deleted
-    Node* helper;
-    Node* helperChild;
+    // Function to remove a node with the given data from the tree
+    void remove(int data) {
+        Node* nodeToDelete = root;
+        Node* target = NULL;
+        Node* helperChild;
+        Color originalColor;
 
-    // Find the node to delete
-    while (nodert != NULL) {
-        if (nodert->data == data) {
-            nodeToDelete = nodert;
+        // Find the node to delete
+        while (nodeToDelete != NULL) {
+            if (nodeToDelete->data == data) {
+                target = nodeToDelete;
+            }
+            if (nodeToDelete->data <= data) {
+                nodeToDelete = nodeToDelete->right;
+            } else {
+                nodeToDelete = nodeToDelete->left;
+            }
         }
-        if (nodert->data <= data) {
-            nodert = nodert->right;
+
+        if (target == NULL) { // Check if the node to delete is found
+            cout << "No such node exists." << endl;
+            return;
+        }
+
+        nodeToDelete = target;
+        originalColor = nodeToDelete->color;
+        if (nodeToDelete->left == NULL) {
+            helperChild = nodeToDelete->right;
+            transplant(nodeToDelete, nodeToDelete->right);
+        } else if (nodeToDelete->right == NULL) {
+            helperChild = nodeToDelete->left;
+            transplant(nodeToDelete, nodeToDelete->left);
         } else {
-            nodert = nodert->left;
+            Node* successor = minValueNode(nodeToDelete->right);
+            originalColor = successor->color;
+            helperChild = successor->right;
+            if (successor->parent == nodeToDelete) {
+                if (helperChild != NULL) {
+                    helperChild->parent = successor;
+                }
+            } else {
+                transplant(successor, successor->right);
+                successor->right = nodeToDelete->right;
+                if (successor->right != NULL) {
+                    successor->right->parent = successor;
+                }
+            }
+            transplant(nodeToDelete, successor);
+            successor->left = nodeToDelete->left;
+            if (successor->left != NULL) {
+                successor->left->parent = successor;
+            }
+            successor->color = nodeToDelete->color;
+        }
+        delete nodeToDelete;
+        if (originalColor == BLACK) {
+            if (helperChild != NULL) {
+                fixDeletion(helperChild);
+            } else {
+                fixDeletion(root); // If helperChild is NULL, we fix from root
+            }
         }
     }
-
-    if (nodeToDelete == NULL) { // Check if the node to delete is found
-        cout << "No such node exists." << endl;
-        return;
-    }
-
-    // Replace the node to delete with its successor if necessary
-    helper = nodeToDelete;      // Initialize helper node with the node to delete
-    Color originalColor = helper->color; // Store the original color of the helper node
-    if (nodeToDelete->left == NULL) {
-        helperChild = nodeToDelete->right; // If the left child is NULL, assign the right child to helperChild
-        transplant(nodeToDelete, nodeToDelete->right); // Replace nodeToDelete with its right child
-    } else if (nodeToDelete->right == NULL) {
-        helperChild = nodeToDelete->left;  // If the right child is NULL, assign the left child to helperChild
-        transplant(nodeToDelete, nodeToDelete->left); // Replace nodeToDelete with its left child
-    } else {
-        helper = minValueNode(nodeToDelete->right); // Find the minimum value node in the right subtree
-        originalColor = helper->color; // Update the original color with the color of the successor node
-        helperChild = helper->right;   // Assign the right child of the helper node to helperChild
-        if (helper->parent == nodeToDelete) {
-            helperChild->parent = helper; // Update the parent of the helperChild
-        } else {
-            transplant(helper, helper->right); // Replace helper with its right child
-            helper->right = nodeToDelete->right; // Update the right child of the helper node
-            helper->right->parent = helper; // Update the parent of the right child
-        }
-        transplant(nodeToDelete, helper); // Replace nodeToDelete with the helper node
-        helper->left = nodeToDelete->left; // Update the left child of the helper node
-        helper->left->parent = helper; // Update the parent of the left child
-        helper->color = nodeToDelete->color; // Update the color of the helper node
-    }
-    delete nodeToDelete; // Delete the nodeToDelete
-    if (originalColor == BLACK && helperChild != NULL) {
-        fixDeletion(helperChild); // Fix any violations of Red-Black Tree properties
-    }
-}
 
 
     // Function to search for a node with the given data in the tree
